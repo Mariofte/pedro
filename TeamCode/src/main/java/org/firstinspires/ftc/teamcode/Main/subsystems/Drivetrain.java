@@ -19,12 +19,14 @@ public class Drivetrain extends SubsystemBase {
     private boolean lowSpeed = false;
     private double headingOffset = 0;
 
-    public Drivetrain(HardwareMap hardwareMap, Telemetry telemetry, boolean isFieldCentric) {
+    public Drivetrain(HardwareMap hardwareMap, Telemetry telemetry, boolean isFieldCentric, boolean lowSpeed) {
         this.telemetry = telemetry;
         this.isFieldCentric = isFieldCentric;
+        this.lowSpeed = lowSpeed;
 
         follower = new Follower(hardwareMap, RFConstants.class, RLConstants.class);
         follower.setStartingPose(new Pose(0, 0, 0));
+        setLowSpeed(lowSpeed);
     }
 
     public void start() {
@@ -47,9 +49,9 @@ public class Drivetrain extends SubsystemBase {
             heading *= 0.4;
         }
 
-        if (!isFieldCentric) {
+        if (isFieldCentric == true) {
             Vector input = fieldCentric(forward, strafe);
-            follower.setTeleOpMovementVectors(input.getYComponent(), input.getXComponent(), heading, isFieldCentric);
+            follower.setTeleOpMovementVectors(input.getYComponent(), input.getXComponent(), heading, false);
         } else {
             follower.setTeleOpMovementVectors(forward, strafe, heading, true);
         }

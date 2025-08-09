@@ -23,11 +23,11 @@ public class DriveCommand extends CommandBase {
     @Override
     public void initialize() {
         drive.start();
+        drive.resetHeading();
     }
 
     @Override
     public void execute() {
-
         drive.setDrive(y.getAsDouble(), x.getAsDouble(), turn.getAsDouble());
         drive.update();
     }
