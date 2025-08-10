@@ -15,14 +15,9 @@ public class Beta extends CommandOpMode {
     {
         GamepadEx player = new GamepadEx(gamepad1);
 
-        Drivetrain drive = new Drivetrain(hardwareMap, telemetry, true, true);
+        Drivetrain drive = new Drivetrain(hardwareMap, telemetry, true, false);
 
-        drive.setDefaultCommand(new DriveCommand(
-                player::getLeftY,
-                player::getLeftX,
-                player::getRightX,
-                drive
-        ));
+        drive.setDefaultCommand(new DriveCommand(drive, player));
 
         schedule(new RunCommand(telemetry::update));
     }

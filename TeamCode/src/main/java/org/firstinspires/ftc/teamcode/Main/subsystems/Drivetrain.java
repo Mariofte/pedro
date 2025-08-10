@@ -11,12 +11,13 @@ import org.firstinspires.ftc.teamcode.Main.constants.RFConstants;
 import org.firstinspires.ftc.teamcode.Main.constants.RLConstants;
 
 import java.util.Locale;
+import java.lang.Math;
 
 public class Drivetrain extends SubsystemBase {
     private final Follower follower;
     private final Telemetry telemetry;
     private boolean isFieldCentric;
-    private boolean lowSpeed = false;
+    private boolean lowSpeed;
     private double headingOffset = 0;
 
     public Drivetrain(HardwareMap hardwareMap, Telemetry telemetry, boolean isFieldCentric, boolean lowSpeed) {
@@ -41,7 +42,7 @@ public class Drivetrain extends SubsystemBase {
         return follower;
     }
 
-    // TODO El último parámetro indica si el modo es Robot-Centric (true) o Field-Centric (false)
+    // TODO El último parámetro indica si el modo es Robot-Centric (flase) o Field-Centric (true)
     public void setDrive(double forward, double strafe, double heading) {
         if (lowSpeed) {
             forward *= 0.4;
@@ -49,10 +50,10 @@ public class Drivetrain extends SubsystemBase {
             heading *= 0.4;
         }
 
-        if (isFieldCentric == true) {
+        if (isFieldCentric) {
             Vector input = fieldCentric(forward, strafe);
             follower.setTeleOpMovementVectors(input.getYComponent(), input.getXComponent(), heading, false);
-        } else {
+        } else if (!isFieldCentric) {
             follower.setTeleOpMovementVectors(forward, strafe, heading, true);
         }
     }
@@ -62,6 +63,7 @@ public class Drivetrain extends SubsystemBase {
         return rotated(angle, y, x);
     }
 
+    // TODO: Dice que tote los joystick
     public Vector rotated(double angle, double yval, double xval) {
         double newX = xval * Math.cos(-angle) - yval * Math.sin(-angle);
         double newY = xval * Math.sin(-angle) + yval * Math.cos(-angle);
@@ -72,30 +74,33 @@ public class Drivetrain extends SubsystemBase {
         return normalizeRadians(getPose().getHeading() - headingOffset);
     }
 
-    public void resetHeading() {
-        this.headingOffset = getPose().getHeading();
-    }
-
     public double normalizeRadians(double angle) {
         while (angle > Math.PI) angle -= 2 * Math.PI;
         while (angle <= -Math.PI) angle += 2 * Math.PI;
         return angle;
     }
 
+    public void resetHeading() {
+        this.headingOffset = getPose().getHeading();
+    }
+
+
     public boolean isFieldCentric() {
         return isFieldCentric;
     }
 
+    public boolean isLowSpeed() {
+        return lowSpeed;
+    }
+
+    // TODO: Dice que isFieldCentric falso
     public void toggleFieldCentric() {
         isFieldCentric = !isFieldCentric;
     }
 
+    // TODO: La puedes llamar desde TeleOp para configurara
     public void setLowSpeed(boolean low) {
         this.lowSpeed = low;
-    }
-
-    public boolean isLowSpeed() {
-        return lowSpeed;
     }
 
     public Pose getPose() {
