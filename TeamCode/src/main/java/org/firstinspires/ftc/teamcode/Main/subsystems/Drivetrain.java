@@ -5,17 +5,25 @@ import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.Vector;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Main.constants.RFConstants;
 import org.firstinspires.ftc.teamcode.Main.constants.RLConstants;
+import org.firstinspires.ftc.teamcode.Main.constants.Constants.DTConstants;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Locale;
 import java.lang.Math;
 
 public class Drivetrain extends SubsystemBase {
-    private final Follower follower;
-    private final Telemetry telemetry;
+    private Follower follower;
+    private Telemetry telemetry;
+
     private boolean isFieldCentric;
     private boolean lowSpeed;
     private double headingOffset = 0;
@@ -26,7 +34,7 @@ public class Drivetrain extends SubsystemBase {
         this.lowSpeed = lowSpeed;
 
         follower = new Follower(hardwareMap, RFConstants.class, RLConstants.class);
-        follower.setStartingPose(new Pose(0, 0, 0));
+        follower.setStartingPose(DTConstants.STARTING_POSE);
         setLowSpeed(lowSpeed);
     }
 
@@ -45,9 +53,9 @@ public class Drivetrain extends SubsystemBase {
     // TODO El último parámetro indica si el modo es Robot-Centric (flase) o Field-Centric (true)
     public void setDrive(double forward, double strafe, double heading) {
         if (lowSpeed) {
-            forward *= 0.4;
-            strafe *= 0.4;
-            heading *= 0.4;
+            forward *= DTConstants.LOW_SPEED_FACTOR;
+            strafe *= DTConstants.LOW_SPEED_FACTOR;
+            heading *= DTConstants.LOW_SPEED_FACTOR;
         }
 
         if (isFieldCentric) {
@@ -75,8 +83,8 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public double normalizeRadians(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle <= -Math.PI) angle += 2 * Math.PI;
+        while (angle > Math.PI) angle -= DTConstants.TWO_PI;
+        while (angle <= -Math.PI) angle += DTConstants.TWO_PI;
         return angle;
     }
 
@@ -109,6 +117,22 @@ public class Drivetrain extends SubsystemBase {
 
     public Vector getVelocity() {
         return follower.getVelocity();
+    }
+
+    public void simulator() throws JSONException, UnknownHostException {
+        Pose2d pose2d = new Pose2d();
+        JSONObject pose = new JSONObject();
+        pose.put("x", pose2d.getX());
+        pose.put("y", pose2d.getY());
+        pose.put("stamp", System.currentTimeMillis() / 100.0);
+
+        DatagramPacket packet = new DatagramPacket(
+                pose.toString().getBytes(),
+                pose.toString().length(),
+                InetAddress.getByName("127.0.0.0"),9999
+        );
+
+
     }
 
     @Override
