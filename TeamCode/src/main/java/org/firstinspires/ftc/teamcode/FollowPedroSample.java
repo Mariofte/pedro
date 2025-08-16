@@ -10,6 +10,8 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.pedroCommand.FollowPathCommand;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Main.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 
 @Autonomous
 public class FollowPedroSample extends CommandOpMode {
-    Follower follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
+    Drivetrain drivetrain = new Drivetrain(hardwareMap, telemetry);
     private final ArrayList<PathChain> paths = new ArrayList<>();
     PathChain pathChain = new PathChain();
     Path path = new Path(
@@ -30,7 +32,7 @@ public class FollowPedroSample extends CommandOpMode {
     public void generatePath() {
         paths.add(
                 // An example path
-                follower.pathBuilder()
+                drivetrain.getFollower().pathBuilder()
                         .addPath(
                                 path
                         )
@@ -46,11 +48,11 @@ public class FollowPedroSample extends CommandOpMode {
 
         schedule(
                 // Updates follower to follow path
-                new RunCommand(() -> follower.update()),
+                new RunCommand(() -> drivetrain.update()),
 
-                new FollowPathCommand(follower, paths.get(0)),
-                new FollowPathCommand(follower, pathChain),
-                new FollowPathCommand(follower, path)
+                new FollowPathCommand(drivetrain.getFollower(), paths.get(0)),
+                new FollowPathCommand(drivetrain.getFollower(), pathChain),
+                new FollowPathCommand(drivetrain.getFollower(), path)
         );
     }
 
